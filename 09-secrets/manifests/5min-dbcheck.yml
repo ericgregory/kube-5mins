@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: 5min-dbcheck
+  name: 5min-dbcheck
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: 5min-dbcheck
+  template:
+    metadata:
+      labels:
+        app: 5min-dbcheck
+    spec:
+      containers:
+      - image: ericgregory/5min-dbcheck:latest
+        name: 5min-dbcheck
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: secrets
+          mountPath: "usr/src/app/secrets"
+      volumes:
+        - name: secrets
+          secret:
+            secretName: mysqlpwd
+            defaultMode: 0400
+
