@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: todo-mysql
+  name: todo-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-mysql
+  template:
+    metadata:
+      labels:
+        app: todo-mysql
+    spec:
+      volumes:
+        - name: todo-volume
+          persistentVolumeClaim:
+            claimName: tododb-claim
+      containers:
+      - image: ericgregory/todo-mysql
+        name: todo-mysql
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: "/var/lib/mysql"
+          name: todo-volume

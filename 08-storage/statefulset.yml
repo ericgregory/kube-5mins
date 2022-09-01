@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+ labels:
+   app: todo-mysql
+ name: todo-mysql
+spec:
+ ports:
+ - port: 80
+   protocol: TCP
+   targetPort: 80
+ selector:
+   app: todo-mysql
+ type: ClusterIP
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: todo-mysql
+  name: todo-mysql
+spec:
+  selector:
+    matchLabels:
+      app: todo-mysql
+  serviceName: "todo-mysql"
+  replicas: 1
+  minReadySeconds: 0
+  template:
+    metadata:
+      labels:
+        app: todo-mysql
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - image: ericgregory/todo-mysql
+        name: todo-mysql
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: "/var/lib/mysql"
+          name: todo-volume
+  volumeClaimTemplates:
+  - metadata:
+      name: todo-volume
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "sc-local"
+      resources:
+        requests:
+          storage: 1Gi

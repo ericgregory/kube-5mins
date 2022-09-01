@@ -1,0 +1,71 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: sc-local
+provisioner: k8s.io/minikube-hostpath
+parameters: 
+  {}
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+allowVolumeExpansion: false
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-mysql
+  labels:
+    app: todo-mysql
+spec:
+  type: ClusterIP
+  selector:
+    app: todo-mysql
+  ports:
+    - port: 3306
+      protocol: TCP
+  clusterIP: "None"
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: todo-mysql
+spec:
+  selector:
+    matchLabels:
+      app: todo-mysql
+  serviceName: todo-mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: todo-mysql
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: todo-mysql
+        image: mysql:8
+        ports:
+        - containerPort: 3306
+          name: todo-mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysqlpwd
+              key: password
+        - name: MYSQL_DATABASE
+          value: "todo_db"
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: todo-volume
+  volumeClaimTemplates:
+  - metadata:
+      name: todo-volume
+    spec:
+      storageClassName: sc-local
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
