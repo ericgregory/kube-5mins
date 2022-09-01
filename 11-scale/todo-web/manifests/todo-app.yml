@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: todo-app
+  name: todo-app
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: todo-app
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: todo-app
+  name: todo-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-app
+  template:
+    metadata:
+      labels:
+        app: todo-app
+    spec:
+      containers:
+      - image: ericgregory/todo-secretly:latest
+        name: todo-secretly
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: secrets
+          mountPath: "usr/src/app/secrets"
+      volumes:
+        - name: secrets
+          secret:
+            secretName: mysqlpwd
+            defaultMode: 0400
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: todo-web
+  name: todo-web
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: todo-web
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: todo-web
+  name: todo-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-web
+  template:
+    metadata:
+      labels:
+        app: todo-web
+    spec:
+      containers:
+      - image: ericgregory/todo-web:latest
+        name: todo-web
+        ports:
+        - containerPort: 80

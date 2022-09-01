@@ -1,0 +1,22 @@
+<div class="container">
+
+<h1>todos</h1>
+   <form method="POST" action="/" >
+      <input type="text" name="task" id="task" placeholder="What do you need to do? &#8629" autocomplete="off" required>
+   </form>
+</div>
+
+<div id="tasks_container">
+
+         {{#each items}}
+         <p id="item_style">
+         {{#if (isCompleted status)}}
+         <span class="completed">{{task}}</span>
+         <a href="/{{task_id}}" id="emoji">&#128465;</a><a href="/ongoing/{{task_id}}" id="emoji">&#10062;</a>
+         {{else}}    
+         <span class="ongoing">{{task}}</span>
+         <a href="/{{task_id}}" id="emoji">&#128465;</a><a href="/completed/{{task_id}}" id="emoji">&#9989;</a>
+         {{/if}}
+         </p>
+         {{/each}}
+</div>
