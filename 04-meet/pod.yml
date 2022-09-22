@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+ name: nginx-2
+ labels:
+   role: app
+spec:
+ containers:
+   - name: web-server
+     image: nginx
